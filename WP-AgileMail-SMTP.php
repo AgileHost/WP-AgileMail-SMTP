@@ -49,15 +49,18 @@ function custom_smtp_activate() {
         'smtp_secure' => 'none',
         'webhook_enabled' => 'false',
         'webhook_url'     => '',
+        'delete_on_uninstall' => 'false',
     );
-    
+
     add_option('custom_smtp_options', $default_options);
 }
 register_activation_hook(__FILE__, 'custom_smtp_activate');
 
 // Função de desativação
 function custom_smtp_deactivate() {
-    // Nada a fazer por enquanto
+    // Nada a fazer aqui. A limpeza das configurações acontece apenas na
+    // exclusão do plugin (ver uninstall.php), quando "Limpar ao remover"
+    // estiver marcado. Assim desativações temporárias preservam os dados.
 }
 register_deactivation_hook(__FILE__, 'custom_smtp_deactivate');
 

@@ -45,6 +45,7 @@ function custom_smtp_options_page() {
             'smtp_secure'       => sanitize_text_field($_POST['smtp_secure']),
             'webhook_enabled' => isset($_POST['webhook_enabled']) ? 'true' : 'false',
             'webhook_url'     => esc_url_raw($_POST['webhook_url']),
+            'delete_on_uninstall' => isset($_POST['delete_on_uninstall']) ? 'true' : 'false',
         );
 
         update_option('custom_smtp_options', $options);
@@ -61,6 +62,7 @@ function custom_smtp_options_page() {
         'smtp_secure' => 'none',
         'webhook_enabled' => 'false',
         'webhook_url'     => '',
+        'delete_on_uninstall' => 'false',
     ));
     
     // Exibir formulário de configurações
@@ -199,8 +201,26 @@ function custom_smtp_options_page() {
                     </td>
                 </tr>
 
+                <tr>
+                    <th scope="row">
+                        <label for="delete_on_uninstall">Limpar ao remover</label>
+                    </th>
+                    <td>
+                        <label>
+                            <input type="checkbox" id="delete_on_uninstall" name="delete_on_uninstall"
+                                   <?php checked($options['delete_on_uninstall'], 'true'); ?> />
+                            Apagar todas as configurações ao excluir o plugin
+                        </label>
+                        <p class="description">
+                            Quando ativado, todas as configurações salvas serão removidas do banco de dados
+                            ao excluir o plugin, deixando tudo limpo. Desativações temporárias preservam os
+                            dados. Caso contrário, as configurações são sempre preservadas.
+                        </p>
+                    </td>
+                </tr>
+
             </table>
-            
+
             <p class="submit">
                 <input type="submit" name="custom_smtp_save" class="button-primary" 
                        value="Salvar Configurações" />
