@@ -14,4 +14,5 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 $options = get_option('custom_smtp_options');
 if (is_array($options) && isset($options['delete_on_uninstall']) && $options['delete_on_uninstall'] === 'true') {
     delete_option('custom_smtp_options');
+    delete_option('custom_smtp_log');
 }

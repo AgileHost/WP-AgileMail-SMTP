@@ -34,8 +34,23 @@ function custom_smtp_init() {
 
     // Monitorar envio de emails para acionar webhook
     add_action('wp_mail_succeeded', 'custom_smtp_trigger_webhook');
+
+    // Disparar o webhook também em caso de falha (se habilitado).
+    add_action('wp_mail_failed', 'custom_smtp_trigger_webhook_failed');
+
+    // Registrar no log os e-mails enviados e as falhas (se o log estiver ativado).
+    add_action('wp_mail_succeeded', 'custom_smtp_log_succeeded');
+    add_action('wp_mail_failed', 'custom_smtp_log_failed');
 }
 add_action('plugins_loaded', 'custom_smtp_init');
+
+// Adicionar link "Configurações" na linha do plugin (lista de plugins).
+function custom_smtp_settings_link($links) {
+    $settings_link = '<a href="' . esc_url(admin_url('options-general.php?page=custom-smtp')) . '">Configurações</a>';
+    array_unshift($links, $settings_link);
+    return $links;
+}
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'custom_smtp_settings_link');
 
 // Função de ativação
 function custom_smtp_activate() {
@@ -47,8 +62,13 @@ function custom_smtp_activate() {
         'smtp_user'   => '',
         'smtp_pass'   => '',
         'smtp_secure' => 'none',
-        'webhook_enabled' => 'false',
-        'webhook_url'     => '',
+        'from_name'   => '',
+        'from_email'  => '',
+        'webhook_enabled'    => 'false',
+        'webhook_url'        => '',
+        'webhook_secret'     => '',
+        'webhook_on_failure' => 'false',
+        'log_enabled'         => 'false',
         'delete_on_uninstall' => 'false',
     );
 
