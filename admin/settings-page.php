@@ -24,18 +24,29 @@ function custom_smtp_options_page() {
     // Salvar configurações?
     if (isset($_POST['custom_smtp_save'])) {
         check_admin_referer('custom_smtp_save_settings');
-        
+
+        // Configurações existentes (para preservar a senha quando o campo vier vazio).
+        $existing = get_option('custom_smtp_options', array());
+        if (!is_array($existing)) {
+            $existing = array();
+        }
+
+        // A senha não é reexibida no formulário; um campo em branco significa
+        // "manter a senha atual". Não é sanitizada para não corromper caracteres especiais.
+        $posted_pass = isset($_POST['smtp_pass']) ? $_POST['smtp_pass'] : '';
+        $smtp_pass   = ($posted_pass !== '') ? $posted_pass : (isset($existing['smtp_pass']) ? $existing['smtp_pass'] : '');
+
         $options = array(
             'smtp_host'         => sanitize_text_field($_POST['smtp_host']),
             'smtp_port'         => intval($_POST['smtp_port']),
             'smtp_auth'         => sanitize_text_field($_POST['smtp_auth']),
             'smtp_user'         => sanitize_text_field($_POST['smtp_user']),
-            'smtp_pass'         => $_POST['smtp_pass'], // Senha não é sanitizada para evitar corromper caracteres especiais
+            'smtp_pass'         => $smtp_pass,
             'smtp_secure'       => sanitize_text_field($_POST['smtp_secure']),
             'webhook_enabled' => isset($_POST['webhook_enabled']) ? 'true' : 'false',
             'webhook_url'     => esc_url_raw($_POST['webhook_url']),
         );
-        
+
         update_option('custom_smtp_options', $options);
         echo '<div class="updated"><p>Configurações salvas com sucesso!</p></div>';
     }
@@ -127,11 +138,13 @@ function custom_smtp_options_page() {
                         <label for="smtp_pass">Senha</label>
                     </th>
                     <td>
-                        <input type="password" id="smtp_pass" name="smtp_pass" 
-                               value="<?php echo esc_attr($options['smtp_pass']); ?>" 
+                        <input type="password" id="smtp_pass" name="smtp_pass"
+                               value="" autocomplete="new-password"
+                               placeholder="<?php echo !empty($options['smtp_pass']) ? '••••••••' : ''; ?>"
                                class="regular-text" />
                         <p class="description">
                             Digite a senha para autenticação no servidor SMTP.
+                            <?php if (!empty($options['smtp_pass'])) echo 'Deixe em branco para manter a senha atual.'; ?>
                         </p>
                     </td>
                 </tr>

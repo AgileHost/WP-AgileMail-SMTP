@@ -61,14 +61,7 @@ function custom_smtp_deactivate() {
 }
 register_deactivation_hook(__FILE__, 'custom_smtp_deactivate');
 
-// Webhook
-function custom_smtp_monitor_email($args) {
-    // Armazenar os argumentos originais para uso posterior
-    add_filter('wp_mail_succeeded', function($result) use ($args) {
-        custom_smtp_trigger_webhook($args);
-        return $result;
-    });
-    
-    return $args;
-}
-add_filter('wp_mail', 'custom_smtp_monitor_email');
+// O webhook é acionado exclusivamente pelo hook 'wp_mail_succeeded' registrado em
+// custom_smtp_init(). O antigo caminho via filtro 'wp_mail' foi removido porque
+// registrava uma nova closure a cada chamada de wp_mail() na mesma requisição,
+// gerando disparos quadráticos (N²) do webhook e reenvio de dados de e-mails anteriores.
